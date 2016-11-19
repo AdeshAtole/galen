@@ -3,9 +3,7 @@ install: mvn install -DskipTests -Dgpg.skip
 jdk:
   - oraclejdk8
 env:
-  - FIREFOX_VERSION=49.0.1
-  - GECKODRIVER_VERSION=v0.11.1
-  - DISPLAY=:99
+  - FIREFOX_VERSION=49.0.1 GECKODRIVER_VERSION=v0.11.1 DISPLAY=:99
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
