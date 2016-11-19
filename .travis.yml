@@ -3,6 +3,8 @@ install: mvn install -DskipTests -Dgpg.skip
 jdk:
   - oraclejdk8
 env:
+  - FIREFOX_VERSION=49.0.1
+  - GECKODRIVER_VERSION=v0.11.1
   - DISPLAY=:99
 before_script:
   - "export DISPLAY=:99.0"
@@ -10,18 +12,21 @@ before_script:
   - sleep 3
 script:
   - |
-      sudo apt-get -y purge chromium-browser
-      export CHROME_REVISION=`curl -s http://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/LAST_CHANGE`
-      curl -L -O "http://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/${CHROME_REVISION}/chrome-linux.zip"
-      unzip chrome-linux.zip
-      sudo ln -sf $PWD/chrome-linux/chrome-wrapper /usr/local/bin/chrome
-      curl -L -o chromedriver.zip http://chromedriver.storage.googleapis.com/2.24/chromedriver_linux64.zip
-      unzip chromedriver.zip
-      export CHROMEDRIVER_PATH=$PWD/chromedriver
+      sudo apt-get -y purge firefox
+      sude apt-get -qqy --no-install-recommends install firefox
+      sudo rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+      curl -L -k --no-verbose -o /tmp/firefox.tar.bz2 "https://download-installer.cdn.mozilla.net/pub/firefox/releases/$FIREFOX_VERSION/linux-x86_64/en-US/firefox-$FIREFOX_VERSION.tar.bz2"
+      sudo apt-get -y purge firefox
+      sudo rm -rf /opt/firefox
+      sudo tar -C /opt -xjf /tmp/firefox.tar.bz2
+      sudo rm /tmp/firefox.tar.bz2
+      sudo mv /opt/firefox /opt/firefox-$FIREFOX_VERSION
+      sudo ln -fs /opt/firefox-$FIREFOX_VERSION/firefox /usr/bin/firefox
+      sudo curl -L -k --no-verbose -o /opt/geckodriver.tar.gz "https://github.com/mozilla/geckodriver/releases/download/$GECKODRIVER_VERSION/geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz"
+      cd /opt && sudo tar -xvzf geckodriver.tar.gz
   - mvn clean test -Dgpg.skip=true -Dgalen.use.fail.exit.code=false
-  - mvn verify -Dgpg.skip=true -Dgalen.use.fail.exit.code=false -Dwebdriver.chrome.driver=$CHROMEDRIVER_PATH -Dgalen.default.browser=chrome
+  - mvn verify -Dgpg.skip=true -Dgalen.use.fail.exit.code=false -Dwebdriver.gecko.driver=/opt/geckodriver -Dgalen.default.browser=firefox
 before_install:
-  - export CHROME_BIN=chromium-browser
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 +extension RANDR -ac -screen 0 1280x1024x16"
 after_failure:
   - find . -name "TestSuite.txt" | xargs cat
