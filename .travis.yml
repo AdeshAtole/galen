@@ -11,7 +11,7 @@ before_script:
 script:
   - |
       sudo apt-get -y purge firefox
-      sude apt-get -qqy --no-install-recommends install firefox
+      sudo apt-get -qqy --no-install-recommends install firefox
       sudo rm -rf /var/lib/apt/lists/* /var/cache/apt/*
       curl -L -k --no-verbose -o /tmp/firefox.tar.bz2 "https://download-installer.cdn.mozilla.net/pub/firefox/releases/$FIREFOX_VERSION/linux-x86_64/en-US/firefox-$FIREFOX_VERSION.tar.bz2"
       sudo apt-get -y purge firefox
